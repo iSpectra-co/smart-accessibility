@@ -1386,7 +1386,7 @@
   // Make it globally available
   window.setAWIDGETPosition = setAWIDGETPosition;
 
-  // Apply on DOM ready
+  // --- Apply on DOM ready
   document.addEventListener("DOMContentLoaded", () => {
     // Get position from localStorage or fallback
     const horizontal = localStorage.getItem("awidget:position") || DEFAULT_POSITION;
@@ -2060,12 +2060,55 @@
     const satMap = ['saturate(1)', 'grayscale(1)', 'saturate(.5)', 'saturate(1.6)'];
     document.documentElement.style.setProperty('--aw-sat-filter', satMap[state.saturation] || 'saturate(1)');
 
-    document.body.classList.remove('aw-align-left', 'aw-align-center', 'aw-align-right', 'aw-align-justify');
-    const alignIdx = Number(state.align) || 0;
-    if (alignIdx > 0) {
-      const alignMap = ['', 'aw-align-left', 'aw-align-right', 'aw-align-justify'];
-      document.body.classList.add(alignMap[alignIdx]);
+    // Map each alignment state to its corresponding class + icon
+    const alignCycleOrder = ['', 'aw-align-left', 'aw-align-center', 'aw-align-right'];
+    const alignMap = {
+      '': "<path fill='currentColor' d='M4 6h16v2H4Zm0 4h12v2H4Zm0 4h16v2H4Zm0 4h10v2H4Z'/>",
+      'aw-align-left': "<path fill='currentColor' d='M4 6h10v2H4Zm0 4h16v2H4Zm0 4h10v2H4Zm0 4h16v2H4Z'/>",
+      'aw-align-center': `
+        <line x1="21" y1="6" x2="3" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="19" y1="10" x2="5" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="21" y1="14" x2="3" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="19" y1="18" x2="5" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      `,
+      'aw-align-right': `<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 10H21M3 14H21M8 18H21M3 6H21"/>`,
+    };
+
+    // Get the tile
+    const tile = document.querySelector('.aw-tile[data-cycle="align"]');
+    if (!tile) throw new Error('Tile not found!');
+
+    // Update alignment
+    function updateAlignment(className) {
+      // Remove all alignment classes (exclude default '')
+      document.body.classList.remove(...alignCycleOrder.filter(c => c));
+
+      // Add new class if exists
+      if (className) document.body.classList.add(className);
+
+      // Update SVG
+      const svg = tile.querySelector('.aw-tile-head svg');
+      if (svg) svg.innerHTML = alignMap[className];
+
+      // Store current index
+      tile.dataset.alignIdx = alignCycleOrder.indexOf(className);
     }
+
+    // Click to cycle
+    tile.addEventListener('click', () => {
+      let idx = Number(tile.dataset.alignIdx);
+      idx = isNaN(idx) ? 0 : idx;
+
+      // Cycle to next
+      idx = (idx + 1) % alignCycleOrder.length;
+      const className = alignCycleOrder[idx];
+
+      updateAlignment(className);
+    });
+
+    // Initialize
+    updateAlignment('');
+
 
     // Letter spacing
     const lsMap = [0, 0.02, 0.05]; // em
@@ -2081,9 +2124,59 @@
       scope.classList.toggle('aw-letter-wide', !isRTL);
     }
 
-    const map = ['', 'aw-cursor-big', 'aw-cursor-cross'];
-    document.body.classList.remove('aw-cursor-big', 'aw-cursor-cross');
-    if (map[state.cursorIdx]) document.body.classList.add(map[state.cursorIdx]);
+    // Define cursor types and corresponding icons + optional titles
+    const cursorMap = [
+      { class: '', icon: `<path d="M1 2L2 1L14 5V7L10.0102 8.59595L14.7071 13.2929L13.2929 14.7071L8.59594 10.0102L7 14H5L1 2Z" fill="currentColor"></path>`, title: 'Default Cursor' },
+      { class: 'aw-cursor-big', icon: `<circle cx="12" cy="12" r="4" fill="currentColor"></circle>`, title: 'Dot Cursor' },
+      { class: 'aw-cursor-cross', icon: `<path d="M4 12H20M12 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>`, title: 'Cross Cursor' }
+    ];
+
+    const cursorTile = document.querySelector('.aw-tile[data-cycle="cursorIdx"]');
+    if (cursorTile) {
+      const head = cursorTile.querySelector('.aw-tile-head');
+
+      // Use existing SVG if present, otherwise create one
+      let svg = head.querySelector('svg.aw-ico');
+      if (!svg) {
+        svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.classList.add('aw-ico');
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("width", "24");
+        svg.setAttribute("height", "24");
+        head.prepend(svg);
+      }
+
+      let idx = Number(cursorTile.dataset.cursorIdx) || 0;
+
+      function updateCursor(idx) {
+        // Update body class
+        document.body.classList.remove(...cursorMap.map(c => c.class).filter(Boolean));
+        if (cursorMap[idx].class) document.body.classList.add(cursorMap[idx].class);
+
+        // Update SVG icon
+        svg.innerHTML = cursorMap[idx].icon;
+
+        // Update aria-pressed
+        cursorTile.setAttribute('aria-pressed', idx > 0 ? 'true' : 'false');
+
+        // Update data attribute
+        cursorTile.dataset.cursorIdx = idx;
+
+        // Update steps indicator if present
+        const stepsEl = cursorTile.querySelectorAll('.aw-step');
+        stepsEl.forEach((s, i) => s.classList.toggle('on', i <= idx));
+      }
+
+      // Initialize
+      updateCursor(idx);
+
+      // Cycle on click
+      cursorTile.addEventListener('click', () => {
+        const steps = Number(cursorTile.dataset.steps) || (cursorMap.length - 1);
+        idx = (idx + 1) % (steps + 1);
+        updateCursor(idx);
+      });
+    }
 
     const panel = document.getElementById("aw-panel");
     const fab = document.getElementById("aw-fab");
@@ -2529,69 +2622,60 @@
     mounted = false;
   }
 
-  // Pause/resume JS animation engines (GSAP, ScrollTrigger, Lottie, Anime.js)
+  // Animation Pause/Resume State
   const _awAnimState = {
     gsapTimeScale: 1,
     animeWasRunning: new WeakSet(),
   };
 
+  // GSAP + ScrollTrigger Pause/Resume
   function _pauseGSAP(on) {
     const g = window.gsap;
     if (!g) return;
 
     try {
       if (on) {
-        // remember current timescale and freeze the global timeline
         _awAnimState.gsapTimeScale = g.globalTimeline.timeScale();
         g.globalTimeline.timeScale(0);
-
-        // pause ticker (halts RAF updates)
         g.ticker?.sleep?.();
-
-        // pause ScrollTrigger-linked animations (don’t fully disable to avoid layout revert)
         if (g.ScrollTrigger) {
           g.ScrollTrigger.getAll().forEach(st => {
-            // main animation
             st.animation?.pause?.();
-            // scrub tween (created internally when scrub:true)
             st.scrubTween?.pause?.();
           });
         }
       } else {
-        // resume ticker
         g.ticker?.wake?.();
-
-        // resume ScrollTrigger animations
         if (g.ScrollTrigger) {
           g.ScrollTrigger.getAll().forEach(st => {
             st.animation?.play?.();
             st.scrubTween?.play?.();
           });
         }
-
         g.globalTimeline.timeScale(_awAnimState.gsapTimeScale || 1);
       }
-    } catch { }
+    } catch {}
   }
 
+  // Lottie Pause/Resume 
   function _pauseLottie(on) {
-    // web component <lottie-player>
     document.querySelectorAll('lottie-player').forEach(p => {
-      try { on ? p.pause() : p.play(); } catch { }
+      try { on ? p.pause() : p.play(); } catch {}
     });
 
-    // bodymovin / lottie-web
     const reg = window.lottie?.getRegisteredAnimations?.();
     if (Array.isArray(reg)) {
       reg.forEach(inst => {
-        try { on ? inst.pause() : inst.play(); } catch { }
+        try { on ? inst.pause() : inst.play(); } catch {}
       });
     }
   }
 
+  // Anime.js Pause/Resume 
   function _pauseAnimeJS(on) {
     const anime = window.anime;
     if (!anime) return;
+
     try {
       const running = anime.running || [];
       running.forEach(instance => {
@@ -2599,52 +2683,32 @@
           _awAnimState.animeWasRunning.add(instance);
           instance.pause?.();
         } else {
-          if (_awAnimState.animeWasRunning.has(instance)) {
-            instance.play?.();
-          }
+          if (_awAnimState.animeWasRunning.has(instance)) instance.play?.();
         }
       });
       if (!on) _awAnimState.animeWasRunning = new WeakSet();
-    } catch { }
+    } catch {}
   }
 
-  /**
-   * Pauses/resumes third-party JS animations.
-   * Extend here if you use other engines (e.g., Swiper autoplay, Splide, Velocity).
-   */
+  // General JS Animations Pause/Resume 
   function pauseJSAnimations(on) {
     _pauseGSAP(on);
     _pauseLottie(on);
     _pauseAnimeJS(on);
-
-    // Example: Swiper autoplay
-    try {
-      document.querySelectorAll('.swiper').forEach(el => {
-        const inst = el.swiper;
-        if (!inst || !inst.params?.autoplay) return;
-        on ? inst.autoplay?.stop?.() : inst.autoplay?.start?.();
-      });
-    } catch { }
-
-    // Example: HTML <marquee> (legacy)
-    try {
-      document.querySelectorAll('marquee').forEach(m => on ? m.stop?.() : m.start?.());
-    } catch { }
   }
 
-  // Your existing page-scope pause (CSS + media)
+  // Apply pause/resume to page 
   function applyNoAnimScope(on) {
     const scope = document.getElementById('aw-scope') || document.body;
 
-    // Toggle CSS "no animation" for the page content only
+    // CSS class to disable animations
     scope.classList.toggle('aw-noanim', !!on);
 
-    // Disable smooth scrolling on the root while paused
+    // Disable smooth scroll
     document.documentElement.style.scrollBehavior = on ? 'auto' : '';
 
     // Pause/resume <video>/<audio>
-    const media = scope.querySelectorAll('video, audio');
-    media.forEach(m => {
+    scope.querySelectorAll('video, audio').forEach(m => {
       try {
         if (on) {
           if (!m.paused) m.dataset._awWasPlaying = '1';
@@ -2652,17 +2716,48 @@
           m.autoplay = false;
           m.setAttribute('preload', 'none');
         } else {
-          if (m.dataset._awWasPlaying === '1') {
-            m.play().catch(() => { });
-          }
+          if (m.dataset._awWasPlaying === '1') m.play().catch(() => {});
           delete m.dataset._awWasPlaying;
         }
-      } catch { }
+      } catch {}
     });
 
-    // NEW: Pause/resume JS engines too
+    // Pause/resume JS engines
     pauseJSAnimations(!!on);
   }
+
+  // Pause/Play Icons 
+  const pauseIcon = `<path fill="currentColor" d="M6 4h3v16H6V4Zm9 0h3v16h-3V4Z"></path>`;
+  const playIcon = `<path fill="currentColor" d="M16.6582 9.28638C18.098 10.1862 18.8178 10.6361 19.0647 11.2122C19.2803 11.7152 19.2803 12.2847 19.0647 12.7878C18.8178 13.3638 18.098 13.8137 16.6582 14.7136L9.896 18.94C8.29805 19.9387 7.49907 20.4381 6.83973 20.385C6.26501 20.3388 5.73818 20.0469 5.3944 19.584C5 19.053 5 18.1108 5 16.2264V7.77357C5 5.88919 5 4.94701 5.3944 4.41598C5.73818 3.9531 6.26501 3.66111 6.83973 3.6149C7.49907 3.5619 8.29805 4.06126 9.896 5.05998L16.6582 9.28638Z"></path>`;
+
+  let isPaused = false;
+
+  // Connect to your .aw-tile HTML 
+  document.addEventListener('DOMContentLoaded', () => {
+    const tile = document.querySelector('.aw-tile[data-toggle="noanim"]');
+    if (!tile) return;
+
+    const svg = tile.querySelector('svg');
+
+    // Initialize icon
+    if (svg) svg.innerHTML = pauseIcon;
+
+    // Click to toggle
+    tile.addEventListener('click', () => {
+      isPaused = !isPaused;
+      applyNoAnimScope(isPaused);
+
+      if (svg) svg.innerHTML = isPaused ? playIcon : pauseIcon;
+
+      // Update ARIA for accessibility
+      tile.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
+
+      // Optional: change text dynamically
+      const text = tile.querySelector('.aw-tile-title');
+      if (text) text.textContent = isPaused ? 'Resume Animations' : 'Pause Animations';
+    });
+  });
+
 
   // Exposed control helpers
   function open() { mount(); openPanel(); }
