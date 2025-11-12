@@ -1351,7 +1351,7 @@
   }
   
   // Logic (your script, packaged)
-  const LS_KEY = 'awidget:prefs', SIDE_KEY = 'awidget:side', COLORS_KEY = 'awidget:colors';
+  const LS_KEY = 'awidget:prefs', SIDE_KEY = 'awidget:position', COLORS_KEY = 'awidget:colors';
   const THEME_KEY = 'awidget:theme';
   const THEMES_KEY = 'awidget:customthemes';
   const defaultOptions = { position: 'right', theme: 'dark', accentColor: '#60a5fa', fontFamily: 'system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial', lang: 'auto' };
@@ -1375,11 +1375,11 @@
     fab.style.left = fab.style.right = "auto";
 
     if (pos === "left") {
-      panel.style.left = "0";
-      fab.style.left = "0";
+      panel.style.left = "16px";
+      fab.style.left = "16px";
     } else if (pos === "right") {
-      panel.style.right = "0";
-      fab.style.right = "0";
+      panel.style.right = "16px";
+      fab.style.right = "16px";
     }
   }
 
