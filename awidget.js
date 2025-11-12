@@ -1636,6 +1636,7 @@
     container.setAttribute('dir', isRTL(code) ? 'rtl' : 'ltr');
     container.setAttribute('lang', code);
   };
+  
   function t(key) { const active = getActiveLang(); const packActive = LangRegistry.get(active)?.pack || {}; const packEN = LangRegistry.get('en')?.pack || {}; return (packActive[key] ?? packEN[key] ?? key); }
   function addLanguage(code, { label, rtl = false, pack = {} }) { LangRegistry.set(code, { label: label || code.toUpperCase(), rtl: !!rtl, pack }); if (getStoredLang() === code) { applyI18n(); buildLangGrid(); } }
   
