@@ -17,7 +17,7 @@
     // Default widget settings
     const defaultSettings = {
       lang: { default: "fr" },
-      theme: "light",
+      theme: "dark",
       position: "left",
       customThemeEnabled: false,
       tiles: {
