@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWIDGET — Test Page</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #f5f7fa;
+      color: #111827;
+      line-height: 1.7;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #062849 0%, #093967 60%, #1687f6 100%);
+      color: #fff;
+      padding: 80px 24px 60px;
+      text-align: center;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 16px; }
+    .hero p  { font-size: 1.15rem; opacity: .85; max-width: 600px; margin: 0 auto 32px; }
+    .hero-badges { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .badge {
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+
+    /* ── Section ── */
+    .section { margin-bottom: 56px; }
+    .section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #062849;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    /* ── Cards ── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #111827; }
+    .card p  { font-size: .9rem; color: #6b7280; }
+
+    /* ── Typography demo ── */
+    .prose { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 32px; }
+    .prose h1 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; color: #062849; }
+    .prose h2 { font-size: 1.4rem; font-weight: 700; margin: 24px 0 10px; color: #093967; }
+    .prose h3 { font-size: 1.1rem; font-weight: 600; margin: 20px 0 8px; color: #111827; }
+    .prose p  { margin-bottom: 14px; color: #374151; }
+    .prose a  { color: #1687f6; text-decoration: underline; }
+    .prose ul { padding-left: 24px; margin-bottom: 14px; }
+    .prose ul li { margin-bottom: 6px; color: #374151; }
+    blockquote {
+      border-left: 4px solid #1687f6;
+      margin: 20px 0;
+      padding: 12px 20px;
+      background: #eff6ff;
+      border-radius: 0 8px 8px 0;
+      color: #1e40af;
+      font-style: italic;
+    }
+
+    /* ── Images / Media ── */
+    .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .media-grid img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* ── Animations ── */
+    .anim-demo { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #1687f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pulse-box {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #10d4b6, #1687f6);
+      border-radius: 14px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { transform: scale(1); opacity:1; } 50% { transform: scale(.9); opacity:.7; } }
+
+    .bounce-dot {
+      width: 20px; height: 20px;
+      background: #e11d48;
+      border-radius: 50%;
+      animation: bounce 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-30px); } }
+
+    /* ── Form ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label { display: block; font-size: .85rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: .95rem;
+      color: #111827;
+      background: #fff;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #1687f6; box-shadow: 0 0 0 3px rgba(22,135,246,.15); }
+    textarea { min-height: 100px; resize: vertical; }
+    .btn-primary {
+      background: #093967;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-primary:hover { background: #062849; }
+
+    /* ── CDN snippet ── */
+    .code-block {
+      background: #0b1220;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      font-family: 'Courier New', monospace;
+      font-size: .88rem;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+    .code-block .kw  { color: #93c5fd; }
+    .code-block .str { color: #6ee7b7; }
+    .code-block .cm  { color: #6b7280; font-style: italic; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid #e5e7eb;
+      color: #9ca3af;
+      font-size: .875rem;
+    }
+    footer a { color: #1687f6; text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .form-grid, .media-grid { grid-template-columns: 1fr; }
+      .media-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     AWIDGET CONFIG — edit before the script tags
+     ═══════════════════════════════════════════════ -->
+<!-- No JavaScript needed! Configure via data-* attributes below. -->
+
+<!-- Hero -->
+<header class="hero">
+  <h1>AWIDGET Test Page</h1>
+  <p>A full-featured accessibility widget. Click the button in the corner to open the panel and try all features.</p>
+  <div class="hero-badges">
+    <span class="badge">WCAG 2.1 AA</span>
+    <span class="badge">Screen Reader</span>
+    <span class="badge">Dyslexia</span>
+    <span class="badge">Low Vision</span>
+    <span class="badge">ADHD Focus</span>
+    <span class="badge">CDN Ready</span>
+  </div>
+</header>
+
+<main id="aw-scope">
+<div class="container">
+
+  <!-- Typography -->
+  <section class="section">
+    <h2>Typography &amp; Content</h2>
+    <article class="prose">
+      <h1>The Quick Brown Fox</h1>
+      <p>This paragraph tests <strong>font size</strong>, <em>letter spacing</em>, text alignment, and <a href="#">link color</a> features. Try adjusting them in the widget panel.</p>
+      <h2>Accessibility Matters</h2>
+      <p>Over 1 billion people worldwide live with some form of disability. Building accessible web experiences ensures your content reaches everyone, regardless of ability.</p>
+      <h3>What this widget helps with</h3>
+      <ul>
+        <li>Visual impairments — high contrast, large fonts, screen reader</li>
+        <li>Motor difficulties — cursor guides, keyboard navigation</li>
+        <li>Cognitive disabilities — dyslexic font, focus mask, pause animations</li>
+        <li>Color blindness — saturation control, custom color palettes</li>
+      </ul>
+      <blockquote>
+        "The power of the Web is in its universality. Access by everyone regardless of disability is an essential aspect." — Tim Berners-Lee
+      </blockquote>
+      <p>Select this text and use the <strong>Read Selection Aloud</strong> tool to test text-to-speech. You can also try the <strong>Talk-to-Write</strong> feature by clicking inside a text field.</p>
+    </article>
+  </section>
+
+  <!-- Feature Cards -->
+  <section class="section">
+    <h2>Feature Overview</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🎨 Color Modes</h3>
+        <p>High contrast, inverted, dark/light themes, and custom color swatches for text, links, and headings.</p>
+      </div>
+      <div class="card">
+        <h3>📝 Typography</h3>
+        <p>Font size boost, OpenDyslexic font, letter spacing, and text alignment controls.</p>
+      </div>
+      <div class="card">
+        <h3>🔍 Focus Aids</h3>
+        <p>Reading ruler, focus mask, cursor guide line, spotlight, and reading bar.</p>
+      </div>
+      <div class="card">
+        <h3>🔊 Tools</h3>
+        <p>Read selection aloud, screen reader mode, and talk-to-write dictation.</p>
+      </div>
+      <div class="card">
+        <h3>🌍 Multi-language</h3>
+        <p>Built-in EN, AR, FR, ES, DE support. Add more via <code>extraLanguages</code> config.</p>
+      </div>
+      <div class="card">
+        <h3>♿ Profiles</h3>
+        <p>One-click presets: Blind, Color Blind, Dyslexia, Low Vision, ADHD, Seizure-safe.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Animations -->
+  <section class="section">
+    <h2>Animations (test Pause Animations)</h2>
+    <div class="anim-demo">
+      <div class="spinner" aria-label="Spinning loader"></div>
+      <div class="pulse-box" aria-label="Pulsing box"></div>
+      <div class="bounce-dot" aria-label="Bouncing dot"></div>
+      <p style="color:#6b7280; font-size:.9rem;">Use <strong>Pause Animations</strong> in the widget to freeze all motion above.</p>
+    </div>
+  </section>
+
+  <!-- Images -->
+  <section class="section">
+    <h2>Images (test Hide Images)</h2>
+    <div class="media-grid">
+      <img src="https://picsum.photos/seed/a11y1/400/300" alt="Sample landscape photo 1" />
+      <img src="https://picsum.photos/seed/a11y2/400/300" alt="Sample landscape photo 2" />
+      <img src="https://picsum.photos/seed/a11y3/400/300" alt="Sample landscape photo 3" />
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section class="section">
+    <h2>Form (test Talk-to-Write &amp; Cursor)</h2>
+    <div class="prose" style="padding:28px;">
+      <div class="form-grid">
+        <div>
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Jane Doe" autocomplete="name" />
+        </div>
+        <div>
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="jane@example.com" autocomplete="email" />
+        </div>
+        <div>
+          <label for="topic">Topic</label>
+          <select id="topic">
+            <option>Accessibility Feedback</option>
+            <option>Feature Request</option>
+            <option>Bug Report</option>
+          </select>
+        </div>
+        <div>
+          <label for="lang-sel">Preferred Language</label>
+          <select id="lang-sel">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="ar">العربية</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <label for="message">Message (click here, then use Talk-to-Write)</label>
+        <textarea id="message" placeholder="Type or dictate your message…"></textarea>
+      </div>
+      <div style="margin-top:20px;">
+        <button class="btn-primary" type="button">Submit</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CDN Usage -->
+  <section class="section" id="accessibility-statement">
+    <h2>CDN Integration</h2>
+    <div class="code-block">
+<span class="cm">&lt;!-- ① Easiest — data-* attributes, zero JavaScript --&gt;</span>
+<span class="kw">&lt;script</span> <span class="str">src</span>=<span class="str">"awidget.js"</span>
+  <span class="str">data-lang</span>=<span class="str">"auto"</span>
+  <span class="str">data-theme</span>=<span class="str">"dark"</span>
+  <span class="str">data-position</span>=<span class="str">"left"</span>
+  <span class="str">data-statement-href</span>=<span class="str">"https://example.com/a11y"</span>
+  <span class="str">data-hide</span>=<span class="str">"tools,manage"</span>
+  <span class="str">data-theme-name</span>=<span class="str">"brand"</span>
+  <span class="str">data-theme-base</span>=<span class="str">"light"</span>
+  <span class="str">data-theme-active</span>
+  <span class="str">data-color-header</span>=<span class="str">"#6366f1"</span>
+  <span class="str">data-color-accent</span>=<span class="str">"#8b5cf6"</span><span class="kw">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- ② Advanced — window.AWIDGET_CONFIG for full control --&gt;</span>
+<span class="kw">&lt;script&gt;</span>
+  window.AWIDGET_CONFIG = {
+    lang: <span class="str">'fr'</span>, theme: <span class="str">'dark'</span>, position: <span class="str">'right'</span>,
+    statement: { href: <span class="str">'https://example.com/a11y'</span> },
+    themes:    [{ name: <span class="str">'brand'</span>, base: <span class="str">'light'</span>, active: true, vars: { <span class="str">'--aw-header'</span>: <span class="str">'#6366f1'</span> } }],
+    languages: [{ code: <span class="str">'nl'</span>, label: <span class="str">'🇳🇱 NL'</span>, rtl: false, pack: { title: <span class="str">'Toegankelijkheidsmenu'</span> } }],
+    sections:  { tools: false, manage: false },
+    palettes:  { text: [<span class="str">'#111827'</span>, <span class="str">'#ffffff'</span>, <span class="str">'#e11d48'</span>] },
+    onMount:       (s) =&gt; console.log(<span class="str">'mounted'</span>, s),
+    onLangChange:  (c) =&gt; console.log(<span class="str">'lang'</span>, c),
+    onThemeChange: (t) =&gt; console.log(<span class="str">'theme'</span>, t),
+  };
+<span class="kw">&lt;/script&gt;</span>
+<span class="kw">&lt;script</span> <span class="str">src</span>=<span class="str">"awidget.js"</span><span class="kw">&gt;&lt;/script&gt;</span>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <p>AWIDGET v2.0.0 &mdash; Built for inclusive web experiences &mdash;
+    <a href="#accessibility-statement">Accessibility Statement</a>
+  </p>
+</footer>
+
+<!-- Widget — single script, configure with data-* attributes -->
+  <script src="../dist/awidget.js"
+    data-lang="en"
+    data-theme="dark"
+    data-color-header="#1eff00"
+    data-color-accent="#0004d6"
+    data-color-bg="#eeff00"
+    data-color-panel="#c01b1b"
+    data-color-text="#ff1100"
+    data-color-border="#d4f000"
+    data-color-muted="#00fbff"
+  ></script>
+</body>
+</html>
