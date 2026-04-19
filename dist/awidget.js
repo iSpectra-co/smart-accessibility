@@ -1,3 +1,18 @@
+/*!
+ * AWIDGET - Accessibility Widget
+ * Version: 2.0.0
+ * CDN Usage:
+ *   <script src="awidget.js"
+ *     data-lang="en"
+ *     data-theme="dark"
+ *     data-position="right"
+ *     data-statement-href="https://example.com/accessibility"
+ *     data-auto-init="true">
+ *   </script>
+ *
+ * Or configure via window.AWIDGET_CONFIG before loading this script:
+ *   window.AWIDGET_CONFIG = { lang: 'fr', theme: 'light', position: 'left' };
+ */
 (function (global, factory) {
   if (typeof exports === 'object' && typeof module !== 'undefined') {
     module.exports = factory(global);
@@ -1202,12 +1217,6 @@
                 </div>
                 <div class="aw-steps"></div>
               </div>
-              <div class="aw-tile" tabindex="0" role="button" data-cycle="cursorIdx" data-steps="2" aria-pressed="false">
-                <div class="aw-tile-head">
-                  <span class="aw-tile-title" data-i18n="cursor">Pointer Type</span>
-                </div>
-                <div class="aw-steps"></div>
-              </div>
             </div>
           </div>
         </details>
@@ -1384,6 +1393,7 @@
     SIDE_KEY = 'awidget:position',
     COLORS_KEY = 'awidget:colors';
   const THEME_KEY = 'awidget:theme';
+  const DEFAULT_POSITION = 'right';
   const THEMES_KEY = 'awidget:customthemes';
 
   const defaultOptions = {
@@ -1395,7 +1405,6 @@
     lang: 'auto',
   };
 
-  let options = { ...defaultOptions };
 
   const _idle = (fn) =>
     'requestIdleCallback' in window
@@ -1499,8 +1508,6 @@
         localStorage.setItem('awidget:position', newPos);
         setAWIDGETPosition(newPos);
       });
-
-      console.log(newPos);
     }
   });
 
@@ -1925,9 +1932,6 @@
     document
       .querySelectorAll('.aw-tile[data-toggle], .aw-tile[data-profile]')
       .forEach((tile) => {
-        const key = tile.dataset.toggle
-          ? tile.dataset.toggle
-          : 'profiles.' + tile.dataset.profile;
         const val = tile.dataset.toggle
           ? !!state[tile.dataset.toggle]
           : !!state.profiles[tile.dataset.profile];
@@ -2007,78 +2011,6 @@
   }
 
   // Colors
-  function applyUserColors() {
-    const c = state.colors || {};
-    const root = document.documentElement;
-    const scope = document.getElementById('aw-scope') || document.body;
-
-    const setOrClear = (name, val) => {
-      if (val && val !== 'none') root.style.setProperty(name, val);
-      else root.style.removeProperty(name);
-    };
-
-    // Never touch body style directly; only CSS vars when chosen
-    setOrClear('--aw-user-text', c.text);
-    setOrClear('--aw-user-link', c.link);
-    setOrClear('--aw-user-heading', c.heading);
-    setOrClear('--aw-user-selection-bg', c.selectionBg);
-    setOrClear('--aw-user-selection-text', c.selectionText);
-
-    // Gate class only if at least one real color is present
-    const hasAny = [
-      'text',
-      'link',
-      'heading',
-      'selectionBg',
-      'selectionText',
-    ].some((k) => c[k] && c[k] !== 'none');
-
-    scope.classList.toggle('aw-has-user-colors', hasAny);
-  }
-
-  // Universal swatch renderer: first item = 'none'
-  function renderSwatches(id, palette, key) {
-    const wrap = document.getElementById(id);
-    if (!wrap) return;
-    wrap.innerHTML = '';
-
-    const items = ['none', ...palette];
-
-    const btnFor = (val) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'aw-swatch' + (val === 'none' ? ' none' : '');
-      b.setAttribute('data-color', val);
-      b.setAttribute('aria-label', val === 'none' ? 'Use site default' : val);
-      b.title = val === 'none' ? 'Use site default' : val;
-      if (val !== 'none') b.style.background = val;
-
-      b.addEventListener('click', () => {
-        state.colors = state.colors || {};
-        state.colors[key] = val; // 'none' clears, hex sets
-        applyUserColors();
-        save();
-        // pressed state
-        Array.from(wrap.children).forEach((el) =>
-          el.setAttribute('aria-pressed', 'false'),
-        );
-        b.setAttribute('aria-pressed', 'true');
-      });
-      return b;
-    };
-
-    items.forEach((v) => wrap.appendChild(btnFor(v)));
-
-    // Initial visual selection = 'none' (but no CSS applied yet)
-    const current = (state.colors?.[key] ?? 'none').toLowerCase();
-    Array.from(wrap.children).forEach((c) =>
-      c.setAttribute(
-        'aria-pressed',
-        (c.dataset.color || '').toLowerCase() === current ? 'true' : 'false',
-      ),
-    );
-  }
-
   // Start empty; DO NOT set defaults anywhere (including reset)
   state.colors = state.colors || {}; // keys: text, link, heading, selectionBg, selectionText
 
@@ -2333,7 +2265,16 @@
         el.setSelectionRange(pos, pos);
         el.dispatchEvent(new Event('input', { bubbles: true }));
       } else if (el.isContentEditable) {
-        document.execCommand('insertText', false, text);
+        // insertText via Selection API (execCommand is deprecated)
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(document.createTextNode(text));
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
       }
     };
     rec.onstart = () => {
@@ -3081,7 +3022,7 @@
     document
       .querySelectorAll('.toggle-group[data-type="position"] .toggle-btn')
       .forEach((btn) => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
           const value = btn.dataset.value;
 
           // Update state
@@ -3109,7 +3050,7 @@
   }
 
   function togglePanel() {
-    const p = document.getElementById('#aw-panel');
+    const p = document.getElementById('aw-panel');
     const opening = !p.classList.contains('aw-open');
     opening ? openPanel() : closePanel();
   }
@@ -3207,7 +3148,7 @@
 
   function initCore() {
     load();
-    options = { ...defaultOptions, ...(window.AWIDGET_OPTIONS || {}) };
+    Object.assign(defaultOptions, window.AWIDGET_OPTIONS || {});
     loadCustomThemes();
 
     // Seed languages (EN/AR/ES)
@@ -3638,8 +3579,559 @@
     unmount,
     open,
     close,
+    version: '2.0.0',
     // Advanced: passthrough to theme / i18n singletons you already expose
     theme: window.AWIDGET_THEME,
     i18n: window.AWIDGET_I18N,
   };
 });
+
+
+/*!
+ * accessibility-widget.js — Easy Config Layer for AWIDGET v2.2.0
+ *
+ * ══════════════════════════════════════════════════════════════════
+ *  THE EASIEST WAY — just add data-* attributes to the script tag:
+ * ══════════════════════════════════════════════════════════════════
+ *
+ *  <script src="awidget.js"></script>
+ *  <script src="accessibility-widget.js"
+ *    data-lang="fr"
+ *    data-theme="dark"
+ *    data-position="left"
+ *    data-statement-href="https://example.com/a11y"
+ *    data-hide="tools,manage"
+ *    data-theme-name="brand"
+ *    data-theme-base="light"
+ *    data-theme-active
+ *    data-color-header="#6366f1"
+ *    data-color-accent="#8b5cf6"
+ *    data-color-bg="#f0f4ff"
+ *    data-color-text="#111827"
+ *    data-color-border="#c7d2fe"
+ *    data-color-muted="#818cf8">
+ *  </script>
+ *
+ * ══════════════════════════════════════════════════════════════════
+ *  ALL data-* ATTRIBUTES  (every one is optional)
+ * ══════════════════════════════════════════════════════════════════
+ *
+ *  data-lang              Language code or 'auto'  (default: auto)
+ *  data-theme             'auto' | 'dark' | 'light'  (default: auto)
+ *  data-position          'right' | 'left'  (default: right)
+ *
+ *  data-statement-href    URL for the accessibility statement link
+ *  data-statement-label   Link label in English (default: "Accessibility Statement")
+ *
+ *  data-hide              Comma-separated sections to hide:
+ *                         language, profiles, visuals, typography,
+ *                         colors, tools, manage
+ *                         Example:  data-hide="tools,manage"
+ *
+ *  data-theme-name        Custom theme identifier  e.g. "brand"
+ *  data-theme-base        'light' | 'dark'  (default: light)
+ *  data-theme-active      (no value needed) — activate theme on load
+ *
+ *  — Custom theme CSS variables (all optional):
+ *  data-color-header      Widget header & FAB color   e.g. "#6366f1"
+ *  data-color-accent      Highlights & active states  e.g. "#8b5cf6"
+ *  data-color-bg          Widget background           e.g. "#f0f4ff"
+ *  data-color-panel       Panel cards background      e.g. "#e8edf8"
+ *  data-color-text        Widget text color           e.g. "#111827"
+ *  data-color-border      Border / separator color    e.g. "#c7d2fe"
+ *  data-color-muted       Secondary text color        e.g. "#818cf8"
+ *
+ * ══════════════════════════════════════════════════════════════════
+ *  ADVANCED — window.AWIDGET_CONFIG (overrides data-* attributes)
+ * ══════════════════════════════════════════════════════════════════
+ *
+ *  <script>
+ *  window.AWIDGET_CONFIG = {
+ *    lang:     'fr',
+ *    theme:    'dark',
+ *    position: 'left',
+ *
+ *    statement: {
+ *      href:   'https://example.com/a11y',
+ *      labels: { en: 'Accessibility Statement', fr: 'Déclaration d\'accessibilité' },
+ *    },
+ *
+ *    themes: [
+ *      { name: 'brand', base: 'light', active: true,
+ *        vars: { '--aw-header': '#6366f1', '--aw-accent': '#8b5cf6' } },
+ *    ],
+ *
+ *    languages: [
+ *      { code: 'nl', label: '🇳🇱 NL', rtl: false,
+ *        pack: { title: 'Toegankelijkheidsmenu' } },
+ *    ],
+ *
+ *    sections: { tools: false, manage: false },
+ *
+ *    palettes: {
+ *      text:    ['#111827', '#ffffff', '#e11d48'],
+ *      link:    ['#2563eb', '#7aa8ff'],
+ *    },
+ *
+ *    onMount:       (s) => console.log('mounted', s),
+ *    onOpen:        ()  => {},
+ *    onClose:       ()  => {},
+ *    onReset:       ()  => {},
+ *    onLangChange:  (c) => {},
+ *    onThemeChange: (t) => {},
+ *  };
+ *  </script>
+ *  <script src="awidget.js"></script>
+ *  <script src="accessibility-widget.js"></script>
+ */
+(function () {
+  'use strict';
+
+  var VERSION      = '2.2.0';
+  var MAX_RETRIES  = 40;
+  var RETRY_DELAY  = 150;
+
+  // ── Grab own <script> tag ────────────────────────────────────────────────
+  var _ownScript = document.currentScript || (function () {
+    var tags = document.querySelectorAll('script[src*="accessibility-widget"]');
+    return tags[tags.length - 1] || null;
+  })();
+
+  // ── Read one data attribute (returns null if missing) ────────────────────
+  function attr(name) {
+    return _ownScript ? (_ownScript.getAttribute('data-' + name)) : null;
+  }
+
+  function hasAttr(name) {
+    return _ownScript ? _ownScript.hasAttribute('data-' + name) : false;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Build config: merge data-* attrs  +  window.AWIDGET_CONFIG
+  // AWIDGET_CONFIG always wins over data-* attrs.
+  // ─────────────────────────────────────────────────────────────────────────
+  function buildConfig() {
+    var js  = window.AWIDGET_CONFIG || {};   // JS config (advanced)
+    var cfg = {};
+
+    // ── Core ──────────────────────────────────────────────────────────────
+    cfg.lang     = js.lang     || attr('lang')     || 'auto';
+    cfg.theme    = js.theme    || attr('theme')    || 'auto';
+    cfg.position = js.position || attr('position') || 'right';
+
+    // ── Statement ─────────────────────────────────────────────────────────
+    if (js.statement && js.statement.href) {
+      cfg.statement = js.statement;
+    } else {
+      var href  = js.statementHref  || attr('statement-href')  || null;
+      var label = js.statementLabel || attr('statement-label') || 'Accessibility Statement';
+      cfg.statement = href ? { href: href, labels: { en: label } } : null;
+    }
+
+    // ── Themes ────────────────────────────────────────────────────────────
+    cfg.themes = js.themes || js.customThemes || [];
+
+    // Build a theme from data-color-* attributes if data-theme-name is set
+    var themeName = js.themeName || attr('theme-name') || null;
+    if (themeName) {
+      var vars = {};
+      var colorKeys = {
+        'header': '--aw-header',
+        'accent': '--aw-accent',
+        'bg':     '--aw-bg',
+        'panel':  '--aw-panel',
+        'text':   '--aw-text',
+        'border': '--aw-border',
+        'muted':  '--aw-muted',
+      };
+      Object.keys(colorKeys).forEach(function (k) {
+        var v = attr('color-' + k);
+        if (v) vars[colorKeys[k]] = v;
+      });
+
+      cfg.themes = cfg.themes.concat([{
+        name:   themeName,
+        base:   js.themeBase || attr('theme-base') || 'light',
+        active: !!(js.themeActive || hasAttr('theme-active')),
+        vars:   vars,
+      }]);
+    }
+
+    // ── Languages ─────────────────────────────────────────────────────────
+    cfg.languages = js.languages || js.extraLanguages || [];
+
+    // ── Section visibility ─────────────────────────────────────────────────
+    // data-hide="tools,manage"  OR  sections: { tools: false }
+    var ALL_SECTIONS = ['language','profiles','visuals','typography','colors','tools','manage'];
+    var sections = {};
+    ALL_SECTIONS.forEach(function (s) { sections[s] = true; });
+
+    var hideAttr = attr('hide') || '';
+    hideAttr.split(',').forEach(function (s) {
+      var key = s.trim();
+      if (key) sections[key] = false;
+    });
+
+    if (js.sections) {
+      Object.keys(js.sections).forEach(function (k) {
+        sections[k] = js.sections[k] !== false;
+      });
+    }
+    cfg.sections = sections;
+
+    // ── Palettes ──────────────────────────────────────────────────────────
+    cfg.palettes = Object.assign({}, DEFAULT_PALETTES, js.palettes || {});
+
+    // ── Hooks ─────────────────────────────────────────────────────────────
+    cfg.onMount       = js.onMount       || null;
+    cfg.onOpen        = js.onOpen        || null;
+    cfg.onClose       = js.onClose       || null;
+    cfg.onReset       = js.onReset       || null;
+    cfg.onLangChange  = js.onLangChange  || null;
+    cfg.onThemeChange = js.onThemeChange || null;
+
+    cfg.extraData = js.extraData || {};
+    return cfg;
+  }
+
+  // ── Default palettes ──────────────────────────────────────────────────────
+  var DEFAULT_PALETTES = {
+    text:          ['#111827','#f9fafb','#e11d48','#22c55e','#eab308','#06b6d4','#a78bfa','#f97316'],
+    link:          ['#2563eb','#7aa8ff','#22c55e','#e11d48','#a78bfa','#f59e0b'],
+    heading:       ['#111827','#1f2937','#0f172a','#7aa8ff','#22c55e','#e11d48','#a78bfa','#f59e0b'],
+    selectionBg:   ['#bde0fe','#a7f3d0','#fde68a','#fecaca','#ddd6fe','#fbcfe8','#fef3c7','#d1fae5'],
+    selectionText: ['#111827','#000000','#ffffff','#1f2937','#0b1220'],
+  };
+
+  var DEFAULT_STATEMENT_LABELS = {
+    en: 'Accessibility Statement',
+    fr: 'Déclaration d\'accessibilité',
+    ar: 'بيان إمكانية الوصول',
+    es: 'Declaración de accesibilidad',
+    de: 'Barrierefreiheitserklärung',
+  };
+
+  // ── Built-in language packs ───────────────────────────────────────────────
+  var BUILTIN_LANGUAGES = {
+    fr: { label:'🇫🇷 FR', rtl:false, pack:{
+      title:'Menu d\'accessibilité',language:'Langue',profiles:'Profils',colors:'Couleurs',
+      typography:'Typographie',visuals:'Visuels',focusAids:'Aides à la mise au point',
+      tools:'Outils',manage:'Gérer',contrastPlus:'Modes de contraste',
+      pauseAnimations:'Mettre les animations en pause',hideImages:'Masquer les images',
+      highlightStructure:'Mettre en évidence la structure',highlightLinks:'Mettre en évidence les liens',
+      fontSize:'Taille de la police',dyslexicFont:'Police pour la dyslexie',
+      letterSpacing:'Espacement des lettres',textAlign:'Alignement du texte',cursor:'Type de curseur',
+      rulerTitle:'Règle de lecture',focusTitle:'Masque de mise au point',cursorGuide:'Guide du curseur',
+      guideSize:'Taille du guide',guideOpacity:'Opacité du guide',textColor:'Couleur du texte',
+      linkColor:'Couleur des liens',headingColor:'Couleur du titre',speak:'Lire la sélection',
+      stop:'Arrêter la voix',resetAll:'Réinitialiser tout',position:'Position',
+      blind:'Cécité (lecteur d\'écran)',colorBlind:'Daltonisme',dyslexia:'Dyslexie',
+      lowVision:'Basse vision',adhd:'TDAH (concentration)',seizure:'Photosensibilité / épilepsie',
+      selectionBackground:'Arrière-plan de la sélection',selectionText:'Couleur du texte sélectionné',
+      saturation:'Saturation',screenReader:'Lecteur d\'écran',talktoWrite:'Parler pour écrire',
+      accessibilityStatement:'Déclaration d\'accessibilité',theme:'Thème',right:'Droite',left:'Gauche',
+      auto:'Automatique',dark:'Sombre',light:'Clair',customTheme:'Personnalisé',
+    }},
+    ar: { label:'🇸🇦 AR', rtl:true, pack:{
+      title:'قائمة إمكانية الوصول',language:'اللغة',profiles:'ملفات التعريف',colors:'الألوان',
+      typography:'الطباعة',visuals:'المرئيات',focusAids:'أدوات التركيز',tools:'الأدوات',manage:'الإدارة',
+      contrastPlus:'أوضاع التباين',pauseAnimations:'إيقاف الرسوم المتحركة',hideImages:'إخفاء الصور',
+      highlightStructure:'إبراز الهيكل',highlightLinks:'إبراز الروابط',fontSize:'حجم الخط',
+      dyslexicFont:'خط عسر القراءة',letterSpacing:'تباعد الأحرف',textAlign:'محاذاة النص',
+      cursor:'نوع المؤشر',rulerTitle:'مسطرة القراءة',focusTitle:'قناع التركيز',
+      cursorGuide:'دليل المؤشر',guideSize:'حجم الدليل',guideOpacity:'شفافية الدليل',
+      textColor:'لون النص',linkColor:'لون الرابط',headingColor:'لون العناوين',
+      speak:'قراءة التحديد',stop:'إيقاف القراءة',resetAll:'إعادة الضبط',position:'الموضع',
+      blind:'كفيف',colorBlind:'عمى الألوان',dyslexia:'عُسر القراءة',lowVision:'ضعف البصر',
+      adhd:'فرط الحركة / تشتت الانتباه',seizure:'حساسية الضوء / الصرع',
+      selectionBackground:'خلفية النص المحدد',selectionText:'لون النص المحدد',
+      saturation:'التشبع اللوني',screenReader:'قارئ الشاشة',talktoWrite:'التحدث للكتابة',
+      accessibilityStatement:'بيان إمكانية الوصول',theme:'سمة',right:'يمين',left:'يسار',
+      auto:'تلقائي',dark:'داكن',light:'فاتح',customTheme:'مخصص',
+    }},
+    es: { label:'🇪🇸 ES', rtl:false, pack:{
+      title:'Menú de accesibilidad',language:'Idioma',profiles:'Perfiles',colors:'Colores',
+      typography:'Tipografía',visuals:'Visuales',focusAids:'Ayudas de enfoque',
+      tools:'Herramientas',manage:'Gestionar',contrastPlus:'Modos de contraste',
+      pauseAnimations:'Pausar animaciones',hideImages:'Ocultar imágenes',
+      highlightStructure:'Resaltar estructura',highlightLinks:'Resaltar enlaces',
+      fontSize:'Tamaño de fuente',dyslexicFont:'Fuente para dislexia',
+      letterSpacing:'Espaciado entre letras',textAlign:'Alineación del texto',cursor:'Tipo de cursor',
+      rulerTitle:'Regla de lectura',focusTitle:'Máscara de enfoque',cursorGuide:'Guía del cursor',
+      guideSize:'Tamaño de la guía',guideOpacity:'Opacidad de la guía',textColor:'Color del texto',
+      linkColor:'Color de los enlaces',headingColor:'Color del título',speak:'Leer selección',
+      stop:'Detener voz',resetAll:'Restablecer todo',position:'Posición',blind:'Ceguera',
+      colorBlind:'Daltonismo',dyslexia:'Dislexia',lowVision:'Baja visión',adhd:'TDAH (enfoque)',
+      seizure:'Fotosensibilidad / epilepsia',selectionBackground:'Fondo de selección',
+      selectionText:'Color del texto seleccionado',saturation:'Saturación',
+      screenReader:'Lector de pantalla',talktoWrite:'Hablar para escribir',
+      accessibilityStatement:'Declaración de accesibilidad',theme:'Tema',right:'Derecha',
+      left:'Izquierda',auto:'Automático',dark:'Oscuro',light:'Claro',customTheme:'Personalizado',
+    }},
+    de: { label:'🇩🇪 DE', rtl:false, pack:{
+      title:'Barrierefreiheitsmenü',language:'Sprache',profiles:'Profile',colors:'Farben',
+      typography:'Typografie',visuals:'Visuelles',focusAids:'Fokushilfen',
+      tools:'Werkzeuge',manage:'Verwalten',contrastPlus:'Kontrastmodi',
+      pauseAnimations:'Animationen pausieren',hideImages:'Bilder ausblenden',
+      highlightStructure:'Struktur hervorheben',highlightLinks:'Links hervorheben',
+      fontSize:'Schriftgröße',dyslexicFont:'Legasthenie-Schrift',letterSpacing:'Zeichenabstand',
+      textAlign:'Textausrichtung',cursor:'Zeigertyp',rulerTitle:'Leselineal',focusTitle:'Fokusmaske',
+      cursorGuide:'Cursor-Lesehilfe',guideSize:'Hilfsgröße',guideOpacity:'Hilfsdeckkraft',
+      textColor:'Textfarbe',linkColor:'Linkfarbe',headingColor:'Überschriftenfarbe',
+      speak:'Auswahl vorlesen',stop:'Sprache stoppen',resetAll:'Alles zurücksetzen',
+      position:'Position',blind:'Blindheit (Screenreader)',colorBlind:'Farbblindheit',
+      dyslexia:'Legasthenie',lowVision:'Sehschwäche',adhd:'ADHS (Konzentration)',
+      seizure:'Lichtempfindlichkeit / Epilepsie',selectionBackground:'Auswahlhintergrund',
+      selectionText:'Ausgewählte Textfarbe',saturation:'Sättigung',screenReader:'Screenreader',
+      talktoWrite:'Sprechen zum Schreiben',accessibilityStatement:'Barrierefreiheitserklärung',
+      theme:'Thema',right:'Rechts',left:'Links',auto:'Automatisch',dark:'Dunkel',light:'Hell',
+      customTheme:'Benutzerdefiniert',
+    }},
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Wait for AWIDGET core
+  // ─────────────────────────────────────────────────────────────────────────
+  function waitForWidget(cb, retries) {
+    if (retries === undefined) retries = MAX_RETRIES;
+    if (window.AWIDGET && window.AWIDGET_I18N && window.AWIDGET_THEME) {
+      cb();
+    } else if (retries > 0) {
+      setTimeout(function () { waitForWidget(cb, retries - 1); }, RETRY_DELAY);
+    } else {
+      console.warn('[accessibility-widget v' + VERSION + '] awidget.js not ready — ensure it loads before this script.');
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Main
+  // ─────────────────────────────────────────────────────────────────────────
+  function init() {
+    if (document.getElementById('aw-panel')) return;
+
+    var cfg = buildConfig();
+
+    // 1. Languages
+    registerBuiltinLanguages();
+    cfg.languages.forEach(function (def) {
+      if (def.code && window.AWIDGET_I18N.addLanguage) {
+        window.AWIDGET_I18N.addLanguage(def.code, {
+          label: def.label || def.code.toUpperCase(),
+          rtl:   !!def.rtl,
+          pack:  def.pack || {},
+        });
+      }
+    });
+
+    // 2. Theme
+    cfg.themes.forEach(function (t) {
+      if (t.name && window.AWIDGET_THEME.add) {
+        window.AWIDGET_THEME.add(t.name, { base: t.base || 'light', vars: t.vars || {} });
+      }
+    });
+
+    var activeTheme = resolveTheme(cfg);
+    if (window.AWIDGET_THEME.set) window.AWIDGET_THEME.set(activeTheme);
+
+    // 3. Language
+    var lang = resolveLang(cfg.lang);
+    if (window.AWIDGET_I18N.setLanguage) window.AWIDGET_I18N.setLanguage(lang);
+
+    // 4. Position
+    var position = resolvePosition(cfg.position);
+
+    // 5. Settings + mount
+    var settings = {
+      lang:      { default: window.AWIDGET_I18N.getLanguage() || lang },
+      theme:     window.AWIDGET_THEME.get() || activeTheme,
+      position:  position,
+      tiles:     buildTiles(cfg),
+      extraData: cfg.extraData,
+    };
+
+    window.AWIDGET.mount({ settings: settings });
+    if (window.setAWIDGETPosition)  window.setAWIDGETPosition(settings.position);
+    if (window.updateAWIDGETTiles)  window.updateAWIDGETTiles(settings);
+
+    // 6. Post-mount DOM tweaks
+    setTimeout(function () {
+      applySections(cfg.sections);
+      applyPalettes(cfg.palettes);
+      wireHooks(cfg);
+    }, 0);
+
+    if (typeof cfg.onMount === 'function') cfg.onMount(settings);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Helpers
+  // ─────────────────────────────────────────────────────────────────────────
+  function resolveLang(lang) {
+    if (!lang || lang === 'auto') {
+      return document.documentElement.lang ||
+             (navigator.language || 'en').split('-')[0];
+    }
+    return lang;
+  }
+
+  function resolveTheme(cfg) {
+    // Any theme marked active: true wins first
+    for (var i = 0; i < cfg.themes.length; i++) {
+      if (cfg.themes[i].active) return 'custom:' + cfg.themes[i].name;
+    }
+    if (!cfg.theme || cfg.theme === 'auto') {
+      return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ? 'dark' : 'light';
+    }
+    return cfg.theme;
+  }
+
+  function resolvePosition(pos) {
+    try { return localStorage.getItem('awidget:position') || pos || 'right'; }
+    catch (e) { return pos || 'right'; }
+  }
+
+  function buildTiles(cfg) {
+    var tiles = {};
+    if (cfg.statement && cfg.statement.href) {
+      tiles.accessibilityStatement = {
+        enabled: true,
+        href:    cfg.statement.href,
+        labels:  Object.assign({}, DEFAULT_STATEMENT_LABELS, cfg.statement.labels || {}),
+      };
+    }
+    return tiles;
+  }
+
+  function registerBuiltinLanguages() {
+    if (!window.AWIDGET_I18N || !window.AWIDGET_I18N.addLanguage) return;
+    Object.keys(BUILTIN_LANGUAGES).forEach(function (code) {
+      window.AWIDGET_I18N.addLanguage(code, BUILTIN_LANGUAGES[code]);
+    });
+  }
+
+  function applySections(sections) {
+    Object.keys(sections).forEach(function (key) {
+      var el = document.querySelector('.aw-acc[data-sec="' + key + '"]');
+      if (el) el.style.display = sections[key] === false ? 'none' : '';
+    });
+  }
+
+  // Swatch map: palette key → DOM id
+  var SWATCH_IDS = {
+    text:          'swatch-text',
+    link:          'swatch-link',
+    heading:       'swatch-heading',
+    selectionBg:   'swatch-selection-bg',
+    selectionText: 'swatch-selection-text',
+  };
+
+  var CSS_VAR_MAP = {
+    text:          '--aw-user-text',
+    link:          '--aw-user-link',
+    heading:       '--aw-user-heading',
+    selectionBg:   '--aw-user-selection-bg',
+    selectionText: '--aw-user-selection-text',
+  };
+
+  var CLASS_MAP = {
+    text:    'aw-has-text',
+    link:    'aw-has-link',
+    heading: 'aw-has-heading',
+  };
+
+  function applyPalettes(palettes) {
+    Object.keys(SWATCH_IDS).forEach(function (key) {
+      renderSwatches(SWATCH_IDS[key], palettes[key] || [], key);
+    });
+  }
+
+  function renderSwatches(id, palette, key) {
+    var wrap = document.getElementById(id);
+    if (!wrap || !palette.length) return;
+    wrap.innerHTML = '';
+
+    var items = ['none'].concat(palette);
+    items.forEach(function (val) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'aw-swatch' + (val === 'none' ? ' none' : '');
+      btn.setAttribute('data-color', val);
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', val === 'none' ? 'Use site default' : val);
+      btn.title = btn.getAttribute('aria-label');
+      if (val !== 'none') btn.style.background = val;
+
+      btn.addEventListener('click', function () {
+        Array.from(wrap.children).forEach(function (el) {
+          el.setAttribute('aria-pressed', 'false');
+        });
+        btn.setAttribute('aria-pressed', 'true');
+
+        var root  = document.documentElement;
+        var scope = document.getElementById('aw-scope') || document.body;
+        var cssVar = CSS_VAR_MAP[key];
+
+        if (cssVar) {
+          if (val === 'none') root.style.removeProperty(cssVar);
+          else root.style.setProperty(cssVar, val);
+        }
+
+        if (CLASS_MAP[key]) {
+          scope.classList.toggle(CLASS_MAP[key], val !== 'none');
+        }
+
+        if (key === 'selectionBg' || key === 'selectionText') {
+          var hasSel = root.style.getPropertyValue('--aw-user-selection-bg') ||
+                       root.style.getPropertyValue('--aw-user-selection-text');
+          scope.classList.toggle('aw-has-selection', !!hasSel);
+        }
+      });
+
+      wrap.appendChild(btn);
+    });
+  }
+
+  function wireHooks(cfg) {
+    var panel = document.getElementById('aw-panel');
+    if (!panel) return;
+
+    if (cfg.onOpen || cfg.onClose) {
+      var wasOpen = panel.classList.contains('aw-open');
+      new MutationObserver(function () {
+        var isOpen = panel.classList.contains('aw-open');
+        if (isOpen === wasOpen) return;
+        wasOpen = isOpen;
+        if (isOpen  && typeof cfg.onOpen  === 'function') cfg.onOpen();
+        if (!isOpen && typeof cfg.onClose === 'function') cfg.onClose();
+      }).observe(panel, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    if (typeof cfg.onReset === 'function') {
+      var resetBtn = panel.querySelector('[data-action="reset"]');
+      if (resetBtn) resetBtn.addEventListener('click', function () {
+        setTimeout(cfg.onReset, 0);
+      });
+    }
+
+    if (typeof cfg.onLangChange === 'function' && window.AWIDGET_I18N) {
+      var _setLang = window.AWIDGET_I18N.setLanguage.bind(window.AWIDGET_I18N);
+      window.AWIDGET_I18N.setLanguage = function (code) {
+        _setLang(code);
+        cfg.onLangChange(code);
+      };
+    }
+
+    if (typeof cfg.onThemeChange === 'function' && window.AWIDGET_THEME) {
+      var _setTheme = window.AWIDGET_THEME.set.bind(window.AWIDGET_THEME);
+      window.AWIDGET_THEME.set = function (theme) {
+        _setTheme(theme);
+        cfg.onThemeChange(theme);
+      };
+    }
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  waitForWidget(init);
+
+})();
