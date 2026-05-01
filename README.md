@@ -78,7 +78,19 @@ Download `awidget.js` and host it yourself:
 <script src="/path/to/awidget.js"></script>
 ```
 
-### Option 2 — `data-*` attributes (recommended — no JavaScript required)
+### Option 2 — CDN via jsDelivr (no download required)
+
+Use directly from a versioned CDN URL — no npm, no download:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/iSpectra-co/smart-accessibility@2.3.0/dist/awidget.js"></script>
+```
+
+Replace `@2.3.0` with any [release tag](https://github.com/iSpectra-co/smart-accessibility/releases) or use `@latest` for the newest version.
+
+---
+
+### Option 3 — `data-*` attributes (recommended — no JavaScript required)
 
 Configure directly on the `<script src="dist/awidget.js">` tag:
 
@@ -119,7 +131,7 @@ Full list of `data-*` attributes:
 | `data-color-border` | `"#c7d2fe"` | Border & separators |
 | `data-color-muted` | `"#818cf8"` | Secondary / muted text |
 
-### Option 3 — `window.AWIDGET_CONFIG` (recommended for full control)
+### Option 4 — `window.AWIDGET_CONFIG` (recommended for full control)
 
 ```html
 <script>

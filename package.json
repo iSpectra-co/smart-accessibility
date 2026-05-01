@@ -1,0 +1,35 @@
+{
+  "name": "awidget",
+  "version": "2.3.0",
+  "description": "Lightweight zero-dependency accessibility panel for any website",
+  "main": "dist/awidget.js",
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "widget",
+    "wcag",
+    "screen-reader",
+    "dyslexia",
+    "high-contrast",
+    "i18n"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/iSpectra-co/smart-accessibility#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iSpectra-co/smart-accessibility.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iSpectra-co/smart-accessibility/issues"
+  },
+  "author": "Mahdi Al-Wadi <m.alwadi@ispectra.co>",
+  "scripts": {
+    "demo": "npx serve ."
+  }
+}
