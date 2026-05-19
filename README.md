@@ -1,7 +1,36 @@
-# AWIDGET — Accessibility Widget
+# SMART Accessibility Widget
 
-A lightweight, zero-dependency accessibility panel you can drop into any website with a single `<script>` tag.
+![SMART Accessibility Widget Banner](./assets/banner.png)
 
+## Overview
+
+SMART Accessibility Widget is an open-source JavaScript library developed by iSpectra to enhance web accessibility for websites and web applications.
+
+The library provides an all-in-one accessibility toolkit designed to help organizations improve usability and support inclusive digital experiences for users with different accessibility needs — with zero licensing cost.
+
+SMART Accessibility Widget can be integrated easily into any website regardless of the technology stack, offering a lightweight, customizable, and user-friendly accessibility experience.
+
+The widget is designed to support accessibility best practices and help organizations align with WCAG 2.1 and WCAG 2.2 standards.
+
+## Why SMART Accessibility Widget?
+
+- Open-source and free to use
+- Easy integration with any website or web application
+- Supports WCAG 2.1 and WCAG 2.2 accessibility standards
+- Modern and responsive accessibility interface
+- Supports accessibility best practices and inclusive design
+- Lightweight and performance-friendly
+- Community-driven development and contributions
+
+## Community & Contribution
+
+We deeply appreciate the open-source community and welcome contributors from around the world to help improve, maintain, and expand the library.
+
+Together, we aim to make SMART Accessibility Widget stable, reliable, and accessible for everyone.
+
+## Developed By
+
+Developed and maintained by [iSpectra](https://www.ispectra.co)
 ---
 
 ## Table of Contents
