@@ -1,6 +1,6 @@
 # SMART Accessibility Widget
 
-![SMART Accessibility Widget Banner](./assets/banner.png)
+![SMART Accessibility Widget Banner](./assets/smart-accessibility.png)
 
 ## Overview
 
