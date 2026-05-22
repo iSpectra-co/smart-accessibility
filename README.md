@@ -32,8 +32,6 @@ We deeply appreciate the open-source community and welcome contributors from aro
 
 Together, we aim to make SMART Accessibility Widget stable, reliable, and accessible for everyone.
 
-## Developed By
-
 Developed and maintained by [iSpectra](https://www.ispectra.co)
 ---
 
