@@ -12,7 +12,7 @@ The widget is designed to support accessibility best practices and help organiza
   <img 
     src="./assets/smart-accessibility.png" 
     alt="SMART Accessibility Widget Banner" 
-    width="900"
+    width="400"
   />
 </p>
 
