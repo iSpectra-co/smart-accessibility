@@ -69,28 +69,13 @@ Developed and maintained by [iSpectra](https://www.ispectra.co)
 
 ---
 
-## Project Structure
-
-```
-smart-widget/
-├── dist/
-│   └── awidget.js               ← single production file (reference this)
-├── demo/
-│   ├── index.html               ← live demo & feature test page
-│   └── configurator.html        ← visual configurator with live preview
-├── CHANGELOG.md
-└── README.md
-```
-
----
-
 ## Quick Start
 
 The fastest integration — no configuration required:
 
 ```html
 <!-- In your <body>, before </body> -->
-<script src="dist/awidget.js"></script>
+<script src="dist/smart-accessibility.js"></script>
 ```
 
 The widget auto-detects the page language (`<html lang>`) and system color scheme (`prefers-color-scheme`) and mounts itself in the bottom-right corner.
@@ -101,10 +86,10 @@ The widget auto-detects the page language (`<html lang>`) and system color schem
 
 ### Option 1 — Local files
 
-Download `awidget.js` and host it yourself:
+Download `smart-accessibility.js` and host it yourself:
 
 ```html
-<script src="/path/to/awidget.js"></script>
+<script src="/path/to/smart-accessibility.js"></script>
 ```
 
 ### Option 2 — CDN via jsDelivr (no download required)
@@ -112,7 +97,7 @@ Download `awidget.js` and host it yourself:
 Use directly from a versioned CDN URL — no npm, no download:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/iSpectra-co/smart-accessibility@2.3.0/dist/awidget.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/iSpectra-co/smart-accessibility@2.3.0/dist/smart-accessibility.js"></script>
 ```
 
 Replace `@2.3.0` with any [release tag](https://github.com/iSpectra-co/smart-accessibility/releases) or use `@latest` for the newest version.
@@ -124,7 +109,7 @@ Replace `@2.3.0` with any [release tag](https://github.com/iSpectra-co/smart-acc
 Configure directly on the `<script src="dist/awidget.js">` tag:
 
 ```html
-<script src="dist/awidget.js"
+<script src="dist/smart-accessibility.js"
   data-lang="fr"
   data-theme="dark"
   data-position="left"
