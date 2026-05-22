@@ -8,7 +8,13 @@ SMART Accessibility Widget can be integrated easily into any website regardless 
 
 The widget is designed to support accessibility best practices and help organizations align with WCAG 2.1 and WCAG 2.2 standards.
 
-![SMART Accessibility Widget Banner](./assets/smart-accessibility.png)
+<p align="center">
+  <img 
+    src="./assets/smart-accessibility.png" 
+    alt="SMART Accessibility Widget Banner" 
+    width="900"
+  />
+</p>
 
 ## Why SMART Accessibility Widget?
 
