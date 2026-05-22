@@ -1,8 +1,8 @@
 {
-  "name": "awidget",
-  "version": "2.3.0",
+  "name": "smart-accessibility",
+  "version": "1.0.0",
   "description": "Lightweight zero-dependency accessibility panel for any website",
-  "main": "dist/awidget.js",
+  "main": "dist/smart-accessibility.js",
   "files": [
     "dist/",
     "README.md",
