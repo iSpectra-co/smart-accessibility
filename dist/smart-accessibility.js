@@ -1,6 +1,6 @@
 /*!
  * AWIDGET - Accessibility Widget
- * Version: 2.3.0
+ * Version: 1.0.0
  * CDN Usage:
  *   <script src="awidget.js"
  *     data-lang="en"

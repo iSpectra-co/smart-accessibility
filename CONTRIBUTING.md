@@ -1,4 +1,4 @@
-# Contributing to AWIDGET
+# Contributing to Smart Accessibility 
 
 Thank you for taking the time to contribute!
 
@@ -23,7 +23,7 @@ Open an issue with the title prefix `[Feature]` and describe:
    ```
    git checkout -b fix/your-fix-name
    ```
-2. Make your changes in `dist/awidget.js`.
+2. Make your changes in `dist/smart-accessibility.js`.
 3. Test manually by opening `demo/index.html` and `demo/configurator.html` in a browser.
 4. Update `CHANGELOG.md` under a new version heading if applicable.
 5. Open a PR against `master` and fill in the pull request template.
@@ -31,7 +31,7 @@ Open an issue with the title prefix `[Feature]` and describe:
 ## Code Style
 
 - Vanilla JavaScript only — no build tools, no dependencies.
-- Keep the widget as a single self-contained file in `dist/awidget.js`.
+- Keep the widget as a single self-contained file in `dist/smart-accessibility.js`.
 - Prefer clarity over cleverness. Accessibility code must be readable.
 
 ## Questions
